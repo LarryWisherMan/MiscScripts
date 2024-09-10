@@ -85,7 +85,6 @@ foreach ($commit in $commits) {
     }
 }
 
-
     # Read the existing changelog if it exists
     $changelogContent = Get-Content -Path $ChangelogPath -ErrorAction SilentlyContinue
     if (-not $changelogContent) {
