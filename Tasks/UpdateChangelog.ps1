@@ -20,23 +20,29 @@ task UpdateChangelog {
         param(
             [string]$FromBranch
         )
-
+    
         # Adjust the commit message pattern for conventional commits
         $commitPattern = '^(feat|fix|docs|style|refactor|perf|test|chore)\((.*)\): (.*)$'
-        $commits = git log $FromBranch..HEAD --pretty=format:"%s" |
-                   Where-Object { $_ -match $commitPattern } |
-                   ForEach-Object {
-                       if ($_ -match $commitPattern) {
-                           @{
-                               Type = $matches[1]
-                               Scope = $matches[2]
-                               Description = $matches[3]
-                           }
-                       }
-                   }
+    
+        # Use string interpolation to ensure the command is interpreted correctly
+        $gitLogCommand = "git log $FromBranch..HEAD --pretty=format:`"%s`""
+    
+        # Execute the Git log command and process the results
+        $commits = Invoke-Expression $gitLogCommand |
+        Where-Object { $_ -match $commitPattern } |
+        ForEach-Object {
+            if ($_ -match $commitPattern) {
+                @{
+                    Type        = $matches[1]
+                    Scope       = $matches[2]
+                    Description = $matches[3]
+                }
+            }
+        }
+    
         return $commits
     }
-
+    
     # Get conventional commits between the base branch (main) and the current branch
     $commits = Get-ConventionalCommits -FromBranch $BaseBranch
 
@@ -53,38 +59,55 @@ task UpdateChangelog {
 
     # Categorize commits according to the Keep a Changelog format
     # Categorize commits according to the Keep a Changelog format
-foreach ($commit in $commits) {
-    switch ($commit.Type) {
-        'feat' {
-            $addedSection += "- **$($commit.Scope)**: $($commit.Description)"
-        }
-        'fix' {
-            $fixedSection += "- **$($commit.Scope)**: $($commit.Description)"
-        }
-        'docs' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        'style' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        'refactor' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        'perf' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        'test' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        'chore' {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
-        }
-        default {
-            $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+    foreach ($commit in $commits) {
+        switch ($commit.Type) {
+            'feat' {
+                $addedSection += "- **$($commit.Scope)**: $($commit.Description)"
+            }
+            'fix' {
+                $fixedSection += "- **$($commit.Scope)**: $($commit.Description)"
+            }
+            'docs' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            'style' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            'refactor' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            'perf' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            'test' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            'chore' {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
+            default {
+                $otherSection += "- **$($commit.Scope)**: $($commit.Description) ($commit.Type)"
+            }
         }
     }
-}
 
+    # Ensure the changelog file exists, create it if not
+    if (-not (Test-Path -Path $ChangelogPath)) {
+        Write-Host "Changelog file does not exist. Creating $ChangelogPath."
+        New-Item -Path $ChangelogPath -ItemType File -Force
+        # Add basic template content for a new changelog
+        @(
+            "# Changelog",
+            "",
+            "All notable changes to this project will be documented in this file.",
+            "",
+            "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),",
+            "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).",
+            "",
+            "## [Unreleased]",
+            ""
+        ) | Set-Content -Path $ChangelogPath
+    }
 
     # Read the existing changelog if it exists
     $changelogContent = Get-Content -Path $ChangelogPath -ErrorAction SilentlyContinue
@@ -121,7 +144,8 @@ foreach ($commit in $commits) {
                 $newChangelogEntries += $otherSection
                 $newChangelogEntries += ""
             }
-        } else {
+        }
+        else {
             $newChangelogEntries += $line
         }
     }
