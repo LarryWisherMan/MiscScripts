@@ -481,7 +481,7 @@ $RemoteComputer = read-host "Enter Remote ComputerName"
 $Local = $env:ComputerName
 
 #Create Sessions and Get PNPDevices
-$sessionData = New-ComputerSession -ComputerName $RemoteComputer, $Local -UseCimSession -UsePSSession  | Get-PnpDevicesForSessions
+$sessionData = New-ComputerSession -ComputerName $RemoteComputer, $Local -UseCimSession -UsePSSession 
 $sessionData = $sessionData | Get-PnpDevicesForSessions
 
 #return pnpDevices
