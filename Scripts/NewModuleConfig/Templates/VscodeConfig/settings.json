@@ -6,7 +6,7 @@
     "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
     "powershell.codeFormatting.whitespaceAroundOperator": true,
     "powershell.codeFormatting.whitespaceAfterSeparator": true,
-    "powershell.codeFormatting.ignoreOneLineBlock": true,
+    "powershell.codeFormatting.ignoreOneLineBlock": false,
     "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationAfterEveryPipeline",
     "powershell.codeFormatting.preset": "Custom",
     "powershell.codeFormatting.alignPropertyValuePairs": true,
@@ -16,9 +16,6 @@
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
     "files.insertFinalNewline": true,
-    "files.autoSave": "afterDelay", // Enables autosave after a delay
-    "files.autoSaveDelay": 1000, // Autosave after 1 second of inactivity (1000ms)
-    "editor.formatOnSave": true, // Enables format on save
     "files.associations": {
         "*.ps1xml": "xml"
     },
@@ -40,5 +37,5 @@
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "files.encoding": "utf8"
-    },
+    }
 }

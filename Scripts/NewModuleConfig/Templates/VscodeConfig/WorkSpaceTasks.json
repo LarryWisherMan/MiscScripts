@@ -1,0 +1,218 @@
+{
+    "version": "2.0.0",
+    "_runner": "terminal",
+    "windows": {
+        "options": {
+            "shell": {
+                "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command"
+                ]
+            }
+        }
+    },
+    "linux": {
+        "options": {
+            "shell": {
+                "executable": "/usr/bin/pwsh",
+                "args": [
+                    "-NoProfile",
+                    "-Command"
+                ]
+            }
+        }
+    },
+    "osx": {
+        "options": {
+            "shell": {
+                "executable": "/usr/local/bin/pwsh",
+                "args": [
+                    "-NoProfile",
+                    "-Command"
+                ]
+            }
+        }
+    },
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "&${cwd}/build.ps1",
+            "args": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "clear": false
+            },
+            "runOptions": {
+                "runOn": "default"
+            },
+            "problemMatcher": [
+                {
+                    "owner": "powershell",
+                    "fileLocation": [
+                        "absolute"
+                    ],
+                    "severity": "error",
+                    "pattern": [
+                        {
+                            "regexp": "^\\s*(\\[-\\]\\s*.*?)(\\d+)ms\\s*$",
+                            "message": 1
+                        },
+                        {
+                            "regexp": "(.*)",
+                            "code": 1
+                        },
+                        {
+                            "regexp": ""
+                        },
+                        {
+                            "regexp": "^.*,\\s*(.*):\\s*line\\s*(\\d+).*",
+                            "file": 1,
+                            "line": 2
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "&${cwd}/build.ps1",
+            "args": [
+                "-AutoRestore",
+                "-Tasks",
+                "test"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                {
+                    "owner": "powershell",
+                    "fileLocation": [
+                        "absolute"
+                    ],
+                    "severity": "error",
+                    "pattern": [
+                        {
+                            "regexp": "^\\s*(\\[-\\]\\s*.*?)(\\d+)ms\\s*$",
+                            "message": 1
+                        },
+                        {
+                            "regexp": "(.*)",
+                            "code": 1
+                        },
+                        {
+                            "regexp": ""
+                        },
+                        {
+                            "regexp": "^.*,\\s*(.*):\\s*line\\s*(\\d+).*",
+                            "file": 1,
+                            "line": 2
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "CreateTestScript",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/_WorkSpaceTasks/create_test_script.ps1",
+                "-CurrentFile",
+                "${file}",
+                "-WorkspaceFolder",
+                "${workspaceFolder}"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Combine PowerShell Functions from Folder into One File",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/_WorkSpaceTasks/Combine_PowerShellFunctions.ps1",
+                "-FolderPath",
+                "${input:folderPath}", // Prompt for folder path
+                "-ExportTo",
+                "${input:destinationFile}" // Prompt for the single export file
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Separate PowerShell Functions into Multiple Files",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/_WorkSpaceTasks/Separate_PowerShellFunctions.ps1", // Correct path to the script
+                "-FunctionFile",
+                "${file}", // The selected file in VSCode
+                "-ExportTo",
+                "${input:destinationFolder}" // Prompt for the export folder
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ],
+    "inputs": [
+        {
+            "id": "functionFiles",
+            "type": "promptString",
+            "description": "Enter the paths to the PowerShell files (comma-separated) to combine functions",
+            "default": "${workspaceFolder}/path_to_first_file.ps1,${workspaceFolder}/path_to_second_file.ps1"
+        },
+        {
+            "id": "destinationFile",
+            "type": "promptString",
+            "description": "Enter the destination file path for combining all functions",
+            "default": "${workspaceFolder}/combined_functions.ps1"
+        },
+        {
+            "id": "destinationFolder",
+            "type": "promptString",
+            "description": "Enter the destination folder path for exporting individual function files",
+            "default": "${workspaceFolder}/exported_functions"
+        },
+        {
+            "id": "folderPath",
+            "type": "promptString",
+            "description": "Enter the folder path containing the PowerShell files",
+            "default": "${workspaceFolder}/ps_functions"
+        }
+    ]
+}
