@@ -1,12 +1,24 @@
-. .\Scripts\NewModuleConfig\Public\New-SamplerModule.ps1
+. .\Scripts\NewModuleConfig\Public\New-RCSamplerModule.ps1
+
+Import-Module Plaster
+
+#Install-Module -Name Plaster -Repository PSGallery -MaximumVersion 1.1.4 -SkipPublisherCheck
+
+$RootDest = "C:\Users\rcarpen\Repos\CodeForge-PE"
+$ModuleName = "PEMonoRepo"
+
+$ProjectPath = Join-Path $RootDest $ModuleName
+$copyPath = (Resolve-Path .\CopyToProject\)
+
+
 
 
 $paramHash = @{
-    RootDest          = "D:\1_Code\AzureRepos\Production Engineering"
-    ModuleName        = "EpicBcaModule"
-    Description       = "Powershell Moudle for montioring and managing BCA Workstations"
+    RootDest          = $RootDest
+    ModuleName        = $ModuleName
+    Description       = "Shared PowerShell toolkit for Production Engineering tasks."
     SourceDirectory   = "Source"
-    ModuleAuthor      = "Ryan Carpenter"
+    ModuleAuthor      = "Production Engineering"
     ModuleVersion     = "1.0.0"
     LicenseType       = "MIT"
     CustomRepo        = "PSGallery"
@@ -18,49 +30,26 @@ $paramHash = @{
     UseCodeCovIo      = $false
     UseGitHub         = $false
     UseAzurePipelines = $True
-    GitHubOwner       = "Ryan Carpenter"
-    Features          = @("Classes", "git",  "ModuleQuality", "Build", "vscode" , "WorkspaceTasks")
+    #GitHubOwner       = "Ryan Carpenter"
+    Features          = @("Classes", "git", "ModuleQuality", "Build")
 }
 
 # Use the paramHash with New-PublicModule
-New-SamplerModule @paramHash
+New-RCSamplerModule @paramHash
 
 
-$paramHash = @{
-    DestinationPath   = "D:\1_Code\GithubRepos"
-    ModuleType        = 'CustomModule'
-    ModuleName        = $ModuleName
-    SourceDirectory   = "source"
-    ModuleAuthor      = "LarryWisherMan"
-    ModuleVersion     = '0.0.1'
-    ModuleDescription = $Description
-    License           = $true
-    LicenseType       = 'MIT'
-    CustomRepo        = "PSGallery"
-    MainGitBranch     = "main"
-    UseGit            = $true
-    UseGitVersion     = $true
-    UseVSCode         = $true
-    UseCodeCovIo      = $false
-    UseGitHub         = $true
-    UseAzurePipelines = $true
-    GitHubOwner       = "LarryWisherMan"
-    $Features         = @("Classes", "git", "UnitTests", "ModuleQuality", "Build", "vscode" , "WorkspaceTasks")
+Get-childItem  $CopyPath |Copy-Item -Destination $ProjectPath -Recurse -Force
 
+
+
+Install-Module -Name 'Sampler' -Scope 'CurrentUser'
+
+$newSampleModuleParameters = @{
+   DestinationPath   = 'C:\Temp'
+   ModuleType        = 'SimpleModule'
+   ModuleName        = 'TestModule'
+   ModuleAuthor      = 'Prod Eng'
+   ModuleDescription = 'Prod Eng Test'
 }
 
-
-$items = Get-item "D:\1_Code\GithubRepos\MiscScripts\Scripts\NewModuleConfig\Templates\VscodeConfig\_WorkSpaceTasks\*"
-
-
-#rename items name by replaing - with _
-foreach ($item in $items) {
-    $newName = $item.Name -replace "-", "_"
-    Rename-Item -Path $item.FullName -NewName $newName
-}
-
-
-#update reference to old names in D:\1_Code\GithubRepos\MiscScripts\Scripts\NewModuleConfig\Templates\VscodeConfig\WorkSpaceTasks.json
-
-$filePath = "D:\1_Code\GithubRepos\MiscScripts\Scripts\NewModuleConfig\Templates\VscodeConfig\WorkSpaceTasks.json"
-$workSpaceTasks = Get-Content -Path $filePath -Raw | ConvertFrom-Json
+New-SampleModule @newSampleModuleParameters
